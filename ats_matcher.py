@@ -1,7 +1,25 @@
 import streamlit as st
 import re
-import fitz  # PyMuPDF for extracting text from PDFs
+import fitz  # PyMuPDF for PDFs
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
+# --- Page setup and intro message ---
+
+st.set_page_config(
+    page_title="ATS Resume Matcher - Improve Your Resume",
+    page_icon="📄",
+    layout="centered",
+    initial_sidebar_state="auto"
+)
+
+st.title("📄 ATS Resume Matcher")
+st.write("""
+Welcome to the ATS Resume Matcher!  
+Paste your resume and job description to check your resume's keyword match score.  
+Get instant feedback and download a detailed PDF report to optimize your resume for ATS.
+""")
 
 # --- Utility Functions ---
 
@@ -24,9 +42,6 @@ def match_score(resume_text, job_desc_text):
     score = len(common_words) / len(job_words) * 100
     return round(score, 2), sorted(missing_words)
 
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from io import BytesIO
 def extract_text_from_pdf(file):
     """Extract text from uploaded PDF file"""
     doc = fitz.open(stream=file.read(), filetype="pdf")
@@ -36,8 +51,6 @@ def extract_text_from_pdf(file):
     return text
 
 def generate_pdf_report(score, missing_keywords):
-    
-
     """Generate PDF report from score and missing keywords"""
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
@@ -65,11 +78,6 @@ def generate_pdf_report(score, missing_keywords):
     return buffer
 
 # --- Streamlit UI ---
-
-st.set_page_config(page_title="ATS Resume Matcher", layout="centered")
-
-st.title("📄 ATS Resume Matcher")
-st.write("Paste your resume and the job description below to check your keyword match score.")
 
 uploaded_file = st.file_uploader("📤 Upload Resume (PDF)", type=["pdf"])
 resume_input = st.text_area("📄 Or Paste Resume", height=200)
